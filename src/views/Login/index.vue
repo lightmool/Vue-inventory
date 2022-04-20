@@ -19,13 +19,13 @@
       <el-input v-model="ruleForm.password" type="password" autocomplete="off"/>
     </el-form-item>
 
-    <el-form-item prop="code" class="item-from">
+    <el-form-item prop="code">
       <label>验证码</label>
-      <el-row :gutter="10">
+      <el-row  :gutter="20">
         <el-col :span="15">
           <el-input v-model.number="ruleForm.code"></el-input>
         </el-col>
-        <el-col :span="9">
+        <el-col :span="9" > 
           <el-button type="success" class="block">获取验证码</el-button>
         </el-col>
       </el-row>
@@ -41,9 +41,11 @@
 
 
 <script  setup >
+import service from "@/utils/request"
 import { ref, reactive } from "vue";
 import { toRaw } from '@vue/reactivity';
 import {isEmail,isPassword}from "@/utils/validate"
+
 
     const menuTab =reactive([
         {text:"登录",current:true},
@@ -57,6 +59,10 @@ function toggleMneu(data){
 //将点击的按钮 添加高光
  data.current=true
 }
+
+/**
+ * 表单基本数据
+ */
 const ruleForm = reactive({
   userName: '',
   password: '',
@@ -68,7 +74,9 @@ const rules = reactive({
   password: [{ validator: validatePass2, trigger: 'blur' }],
   code: [{ validator: checkAge, trigger: 'blur' }],
 })
-
+/**
+ * 表单判断函数
+ */
 function checkAge (rules, value, callback){
     if(value===""){
       callback(new Error("验证码不能为空"))
@@ -144,5 +152,8 @@ function validatePass2 (rules, value, callback) {
       width: 100%;
     }
     .login-btn{margin-top: 19px;}
+  }
+  :deep(.el-form-item__content){
+    display: inline-block ;
   }
 </style>
