@@ -1,81 +1,56 @@
 <template>
-  <div id="login">
-    <!-- 内容主体区域 -->
-  <div class="login-wrap">
-    <!-- 登录注册按钮 -->
-    <ul class="menu-tab" >
-        <li v-for="(item) in menuTab" :key="item.id" :class="{'current':item.current}" @click="toggleMneu(item)"> {{item.text}}</li>
-    </ul>
-    <!-- 登录表单 -->
-     <el-form :ref="ruleForm" :model="ruleForm" status-icon :rules="rules" class="login-from" size="medium">
-    
-    <el-form-item prop="userName" class="item-from">
-      <label>用户名</label>
-      <el-input v-model="ruleForm.userName" type="text" autocomplete="off" />
-    </el-form-item>
-    
-    <el-form-item prop="password" class="item-from">
-      <label>密码</label>
-      <el-input v-model="ruleForm.password" type="password" autocomplete="off"/>
-    </el-form-item>
+  <div>
+      <el-form :rules="rules" 
+                v-loading="loading"
+                element-loading-text="正在登陆中"
+                element-loading-spinner="el-icon-loading"
+                element-loading-background="rgba(0, 0, 0, 0.8)"
+                :model="loginForm"
+               class="loginContainer">
+            <h3 class="loginTitle">系统登录</h3>
+            <el-form-item prop="userName">
+                <el-input type="text" auto-complete="false" v-model="loginForm.userName" placeholder="请输入用户名"></el-input>
+            </el-form-item>    
+            <el-form-item prop="password">
+                 <el-input type="password" auto-complete="false" v-model="loginForm.password" placeholder="请输入密码"></el-input>
+            </el-form-item>
+            <el-form-item prop="code">
+                <el-input type="text" auto-complete="false" v-model="loginForm.code" placeholder="点击图片更换验证码" style="width:250px;margin-right:5px"></el-input>    
+            </el-form-item>
+                <!-- 验证码地址 -->
+                <img :src="captchaUrl">
+                <el-checkbox class="loginRemember" v-model="checked">记住我</el-checkbox>
+                <el-button type="primary" style="width:100%" @click="submitLogin">登录</el-button>
 
-    <el-form-item prop="code">
-      <label>验证码</label>
-      <el-row  :gutter="20">
-        <el-col :span="15">
-          <el-input v-model.number="ruleForm.code"></el-input>
-        </el-col>
-        <el-col :span="9" > 
-          <el-button type="success" class="block">获取验证码</el-button>
-        </el-col>
-      </el-row>
-      </el-form-item>
-    <el-form-item >
-    <el-button type="danger" @click="submitForm(ruleFormRef)" class="login-btn block" >提交</el-button>
-    </el-form-item>
-  </el-form>
-  </div>
+      </el-form>
   </div>
 </template>
 
-
-
-<script  setup >
-import service from "@/utils/request"
-import { ref, reactive } from "vue";
-import { toRaw } from '@vue/reactivity';
-import {isEmail,isPassword}from "@/utils/validate"
-
-
-    const menuTab =reactive([
-        {text:"登录",current:true},
-        {text:"注册",current:false}
-      ])
-function toggleMneu(data){
-//点击按钮将两个按钮的current变为false
-  toRaw(menuTab).forEach(element => {
-    element.current=false
-  });
-//将点击的按钮 添加高光
- data.current=true
-}
-
-/**
- * 表单基本数据
- */
-const ruleForm = reactive({
-  userName: '',
-  password: '',
-  code: '',
-})
-
-const rules = reactive({
+<script setup>
+import { ref,reactive } from "@vue/reactivity";
+import {isPassword} from "@/utils/validate"
+import {GetSms,Login} from "@/api/login"
+import router from "@/router/index"
+//登录表单基本参数
+const captchaUrl=ref('');
+const loginForm=ref({
+            userName:"admin",
+            password:"123456",
+            code:""
+});
+//登录跳转默认为flase
+const loading=ref(false);
+//记住我 默认为true
+const  checked=ref(true);
+//验证参数
+const rules = ref({
   userName: [{ validator: validatePass, trigger: 'blur' }],
   password: [{ validator: validatePass2, trigger: 'blur' }],
   code: [{ validator: checkAge, trigger: 'blur' }],
 })
+
 /**
- * 表单判断函数
+ * 验证码判断函数
  */
 function checkAge (rules, value, callback){
     if(value===""){
@@ -84,15 +59,20 @@ function checkAge (rules, value, callback){
        callback()
     }
 }
-
+/**
+ * 用户名验证函数
+ */
 function validatePass (rules, value, callback) {
+    
     if(value===""){
       callback(new Error("用户名不能为空"))
     }else {
       callback()
     }
 }
-
+/**
+ * 密码验证函数
+ */
 function validatePass2 (rules, value, callback) {
     if(value===""){
       callback(new Error("密码不能为空"))
@@ -104,56 +84,42 @@ function validatePass2 (rules, value, callback) {
 
 
 }
+/**
+ * 提交
+ */
+function submitLogin (){
+  console.log(Login);
+  Login(loginForm.value).then(resp=>{
+    if(!resp){
+      window.sessionStorage.setItem("tokenStr","3N3zVdHqr5A8TTes^2k96Y823%kk*NeXL^GGxgCz")
+      router.replace("/home")
+    }
+  })
+}
 
 </script>
 
-
-<style lang="scss" scoped>
-#login{
-  //高度100%
-  height: 100vh;
-  //背景颜色
-  background-color: #7dadda;
-}
-.login-wrap{
-  width:330px;
-  margin:auto;
-}
-//按钮
-.menu-tab{
-  text-align: center;
-  li{
-    display: inline-block;
-    width:88px;
-    line-height: 36px;
-    font-size: 14px;
-    color: #fff;
-    border-radius: 2px;//圆角
-    cursor: pointer;//鼠标变成手势
-  }
-  .current{
-    background-color: rgba(0,0,0,.1);//选中颜色
-  }
-}
-//登陆表单class
-.login-from{
-    margin-top: 29px;
-    label{
-      display: block;
-      margin-bottom: 3px;
-      font-size: 14px;
-      color:#fff
+<style>
+    .loginContainer{
+        border-radius: 15px;
+        background-clip: padding-box;
+        margin:180px auto;
+        width:350px;
+        padding:15px 35px 15px 35px;
+        background: #fff;
+        border:1px solid #eaeaea;
+        box-shadow: 0 0 25px #cac6c6;
     }
-    .item-from{
-      margin-bottom: 13px;
+    .loginTitle{
+        margin:0px auto 40px auto;
+        text-align: center;
     }
-    .block{
-      display: block;
-      width: 100%;
+    .loginRemember{
+        text-align: left;
+        margin: 0px 0px 15px;
     }
-    .login-btn{margin-top: 19px;}
-  }
-  :deep(.el-form-item__content){
-    display: inline-block ;
-  }
+    .el-form-item__content{
+        display: flex;
+        align-items: center;
+    }
 </style>

@@ -19,8 +19,8 @@ export const isEmail = (s) =>
  * @param {*} s 
  * @returns 
  */
-export const isPassword=(s)=>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(s); 
+export const isPassword = (s) =>
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(s);
 
 /**
  * 手机号码

@@ -1,9 +1,22 @@
 import { createStore } from "vuex";
 
+
 export default createStore({
-  state: {},
+  state: {
+    rotes: []
+  },
   getters: {},
-  mutations: {},
+  /**
+   * 同步执行
+   */
+  mutations: {
+    initRouters(state, data) {
+      state.rotes = dada
+    }
+  },
+  /**
+   * 异步执行
+   */
   actions: {},
   modules: {},
 });
